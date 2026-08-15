@@ -8,6 +8,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import workspaceRoutes from "./routes/workspaces.js";
 import { getRedis } from "./config/redis.js";
 import documentRoutes from "./routes/documents.js";
+import { startIngestionWorker } from "./jobs/ingestion.worker.js";
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use(errorHandler);
 // Connect Redis on startup then start listening
 const start = async () => {
   getRedis(); // establish connection early so first request isn't slow
+  startIngestionWorker(); // start the ingestion worker to process document ingestion jobs
 
   app.listen(env.PORT, () => {
     console.log(`Within API running on port ${env.PORT} [${env.NODE_ENV}]`);
