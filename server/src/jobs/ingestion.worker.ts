@@ -6,6 +6,9 @@ import { LIMITS } from "../config/limits.js";
 import { logger } from "../utils/logger.js";
 import type { IngestionJobData } from "../config/queue.js";
 import mammoth from "mammoth";
+import { chunkDocument } from "../services/ingestion/chunker.js";
+import { embedChunks } from "../services/ingestion/embedder.js";
+import { chunkRepo } from "../repositories/chunk.repo.js";
 //pdf-parse is a CommonJS package that does not export a proper ESM default
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
@@ -146,12 +149,8 @@ const processJob = async (job: Job<IngestionJobData>): Promise<void> => {
     const buffer = await downloadFile(storagePath);
 
     /*
-      For PDFs check page count before full text extraction.
-      getPdfPageCount does a minimal parse pass that returns
-      metadata without rendering every page to text.
-      This avoids wasting CPU and memory on documents we will reject.
-      For DOCX and plain text there is no cheap page count check
-      available so we estimate after extraction.
+      For PDFs check page count with a cheap metadata pass before
+      doing the expensive full text extraction.
     */
     if (mimeType === "application/pdf") {
       const pageCount = await getPdfPageCount(buffer);
@@ -168,11 +167,6 @@ const processJob = async (job: Job<IngestionJobData>): Promise<void> => {
       await documentRepo.updatePageCount(documentId, pageCount);
     }
 
-    /*
-      Full text extraction, for PDFs this is the expensive step
-      that we now only reach after confirming the page count is
-      within limits.
-    */
     const extracted = await extractText(buffer, mimeType);
 
     logger.info("Text extraction complete", {
@@ -183,7 +177,7 @@ const processJob = async (job: Job<IngestionJobData>): Promise<void> => {
 
     /*
       For non-PDF formats enforce page count after extraction
-      since there is no cheaper alternative.
+      since there is no cheaper pre-extraction check available.
     */
     if (mimeType !== "application/pdf") {
       if (extracted.pageCount > LIMITS.MAX_PAGES_PER_DOCUMENT) {
@@ -198,14 +192,49 @@ const processJob = async (job: Job<IngestionJobData>): Promise<void> => {
       await documentRepo.updatePageCount(documentId, extracted.pageCount);
     }
 
+    /*
+      Split the extracted text into overlapping chunks that
+      preserve section structure and context boundaries.
+    */
     await documentRepo.updateStatus(documentId, "CHUNKING");
 
-    logger.info("Ingestion job complete (Phase 2 stub)", {
+    const chunks = chunkDocument(extracted.text, documentId, workspaceId);
+
+    logger.info("Chunking complete", {
       documentId,
-      pageCount: extracted.pageCount,
+      chunkCount: chunks.length,
     });
 
+    /*
+      Generate embeddings for all chunks using OpenAI
+      text-embedding-3-small in sequential batches.
+    */
+    await documentRepo.updateStatus(documentId, "EMBEDDING");
+
+    const embeddedChunks = await embedChunks(chunks);
+
+    logger.info("Embedding complete", {
+      documentId,
+      embeddedCount: embeddedChunks.length,
+    });
+
+    /*
+      Insert all embedded chunks into pgvector.
+      Upsert is idempotent so retries are safe.
+    */
+    await documentRepo.updateStatus(documentId, "INDEXING");
+
+    await chunkRepo.insertBatch(documentId, workspaceId, embeddedChunks);
+
+    logger.info("Indexing complete", { documentId });
+
     await documentRepo.updateStatus(documentId, "READY");
+
+    logger.info("Ingestion job complete", {
+      documentId,
+      chunkCount: embeddedChunks.length,
+      pageCount: extracted.pageCount,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
 

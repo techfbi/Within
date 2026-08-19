@@ -15,6 +15,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().min(1),
 
   GROQ_API_KEY: z.string().min(1),
+  OPENAI_API_KEY: z.string().min(1),
   ANTHROPIC_API_KEY: z.string().optional(), // dormant, kept for future upgrade to paid Claude  OPENAI_API_KEY: z.string().min(1),
 
   AXIOM_TOKEN: z.string().optional(),
