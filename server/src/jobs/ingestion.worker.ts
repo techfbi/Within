@@ -198,7 +198,7 @@ const processJob = async (job: Job<IngestionJobData>): Promise<void> => {
     */
     await documentRepo.updateStatus(documentId, "CHUNKING");
 
-    const chunks = chunkDocument(extracted.text, documentId, workspaceId);
+    const chunks = chunkDocument(extracted.text);
 
     logger.info("Chunking complete", {
       documentId,

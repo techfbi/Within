@@ -23,7 +23,7 @@ export const LIMITS = {
   MAX_CHUNKS_PER_DOCUMENT: 2000,
 
   //This controls your RAG pipeline. 
-  RETRIEVAL_TOP_K: 20,
+  RETRIEVAL_TOP_K: 20, //how many matching chunks w want back.
   CONTEXT_TOP_K: 10,
   MIN_RELEVANCE_SCORE: 0.3, //helps determine:"Are these chunks actually relevant enough to answer this question?"
 

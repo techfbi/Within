@@ -176,7 +176,46 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+        Functions: {
+      match_chunks_vector: {
+        Args: {
+          query_embedding: number[];
+          match_workspace_id: string;
+          match_document_id: string | null;
+          match_count: number;
+        };
+        Returns: {
+          id: string;
+          document_id: string;
+          workspace_id: string;
+          chunk_index: number;
+          content: string;
+          page_number: number | null;
+          section_title: string | null;
+          token_count: number | null;
+          similarity: number;
+        }[];
+      };
+      match_chunks_fts: {
+        Args: {
+          query_text: string;
+          match_workspace_id: string;
+          match_document_id: string | null;
+          match_count: number;
+        };
+        Returns: {
+          id: string;
+          document_id: string;
+          workspace_id: string;
+          chunk_index: number;
+          content: string;
+          page_number: number | null;
+          section_title: string | null;
+          token_count: number | null;
+          rank: number;
+        }[];
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

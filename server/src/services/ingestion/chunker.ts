@@ -68,11 +68,7 @@ const cleanHeading = (line: string): string =>
      chunk boundaries.
   5. Hard stop at MAX_CHUNKS_PER_DOCUMENT.
 */
-export const chunkDocument = (
-  text: string,
-  documentId: string,
-  workspaceId: string
-): Chunk[] => {
+export const chunkDocument = (text: string): Chunk[] => {
   const chunks: Chunk[] = [];
   const lines = text.split("\n");
 
