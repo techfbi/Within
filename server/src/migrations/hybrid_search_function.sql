@@ -30,7 +30,7 @@ BEGIN
     dc.page_number,
     dc.section_title,
     dc.token_count,
-    1 - (dc.embedding <=> query_embedding) AS similarity
+    1 - (dc.embedding <=> query_embedding) AS similarity -- Convert that cosine distance (<=>) into a similarity-style score where higher is better
   FROM document_chunks dc
   WHERE
     dc.workspace_id = match_workspace_id
