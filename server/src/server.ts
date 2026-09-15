@@ -10,6 +10,7 @@ import { getRedis } from "./config/redis.js";
 import documentRoutes from "./routes/documents.js";
 import { startIngestionWorker } from "./jobs/ingestion.worker.js";
 import queryRoutes from "./routes/query.js";
+import { workspaceConversationRouter, conversationRouter } from "./routes/conversations.js";
 
 const app = express();
 
@@ -47,6 +48,8 @@ app.get("/health", (_req, res) => {
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/workspaces/:workspaceId/documents", documentRoutes);
 app.use("/api/workspaces/:workspaceId/query", queryRoutes);
+app.use("/api/workspaces/:workspaceId/conversations", workspaceConversationRouter);
+app.use("/api/conversations", conversationRouter);
 
 // 404 handler, must come after all routes
 app.use((_req, res) => {
