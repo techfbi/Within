@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /signup
+
+Disallow: /dashboard
+Disallow: /workspace
+
+Sitemap: https://within.app/sitemap.xml
