@@ -1,12 +1,18 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/*
+    ---break---
+  */
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   /*
     Typography
   */
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-instrument-serif), Georgia, serif;
-  --font-mono: var(--font-jetbrains-mono), monospace;
+  --font-sans: var(--font-sans), "Hanken Grotesk", system-ui, sans-serif;
+  --font-display: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
 
   /*
     Colors — light theme base
@@ -153,5 +159,36 @@
 
   :focus:not(:focus-visible) {
     outline: none;
+  }
+
+    @keyframes shimmer {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+/*
+    ---break---
+  */
+@theme inline {
+  --color-ring: var(--ring);
+  --animate-meteor: meteor 5s linear infinite;
+  @keyframes meteor {
+  0% {
+    transform: rotate(var(--angle)) translateX(0);
+    opacity: 1;
+    }
+  70% {
+    opacity: 1;
+    }
+  100% {
+    transform: rotate(var(--angle)) translateX(-500px);
+    opacity: 0;
+    }
   }
 }

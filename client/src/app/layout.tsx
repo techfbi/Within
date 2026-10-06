@@ -1,28 +1,18 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
-import { JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Hanken_Grotesk, Inter } from "next/font/google";
 import Providers from "@/components/Providers";
 import { brand } from "@/config/brand";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({
+const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["500", "700"],
+  variable: "--font-display",
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-instrument-serif",
-  display: "swap",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(brand.url),
@@ -34,7 +24,6 @@ export const metadata: Metadata = {
   keywords: [
     "AI document workspace",
     "document knowledge base",
-    "RAG",
     "personal AI assistant",
     "document Q&A",
   ],
@@ -81,9 +70,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${instrumentSerif.variable} ${jetBrainsMono.variable}`}
+      className={cn(bricolageGrotesque.variable, "font-sans", inter.variable)}
+      suppressHydrationWarning
     >
-      <body className="bg-[#F8F7F5] text-[#0F0F0F] font-sans antialiased">
+      <body
+        className="bg-background text-text-primary font-sans antialiased"
+        suppressHydrationWarning
+      >
+        {" "}
         <Providers>{children}</Providers>
       </body>
     </html>

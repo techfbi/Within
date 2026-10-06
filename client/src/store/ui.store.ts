@@ -13,19 +13,16 @@ interface UIStore {
   activeConversationId: string | null;
   setActiveConversationId: (id: string | null) => void;
 
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+
   theme: Theme;
   setTheme: (theme: Theme) => void;
 }
 
-/*
-  Applies the theme to the html element.
-  Called on store init and on every theme change.
-*/
 const applyTheme = (theme: Theme) => {
   if (typeof document === "undefined") return;
-
   const root = document.documentElement;
-
   if (theme === "dark") {
     root.setAttribute("data-theme", "dark");
   } else if (theme === "light") {
@@ -48,6 +45,9 @@ export const useUIStore = create<UIStore>()(
       activeConversationId: null,
       setActiveConversationId: (id) => set({ activeConversationId: id }),
 
+      sidebarOpen: false,
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
+
       theme: "system",
       setTheme: (theme) => {
         applyTheme(theme);
@@ -58,10 +58,6 @@ export const useUIStore = create<UIStore>()(
       name: "within-ui",
       partialize: (state) => ({ theme: state.theme }),
       onRehydrateStorage: () => (state) => {
-        /*
-          Apply saved theme immediately on page load
-          before React renders to avoid a flash of wrong theme.
-        */
         if (state?.theme) applyTheme(state.theme);
       },
     }

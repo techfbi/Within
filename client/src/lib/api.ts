@@ -11,7 +11,7 @@ const getBaseUrl = () =>
   Imported lazily to avoid circular dependency with supabaseClient.
 */
 const getAuthHeader = async (): Promise<Record<string, string>> => {
-  const { supabase } = await import("./supabaseClient.js");
+  const { supabase } = await import("./supabaseClient");
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
 
