@@ -8,7 +8,7 @@ export const getRedis = (): Redis => {
 
   instance = new Redis(env.REDIS_URL, {
     tls: env.REDIS_URL.startsWith("rediss://") ? {} : undefined,
-    maxRetriesPerRequest: 3,
+    maxRetriesPerRequest: null,
     lazyConnect: false,
     enableReadyCheck: true,
   });
