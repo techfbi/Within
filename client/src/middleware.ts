@@ -2,10 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /*
-  Proxy runs on every request before the page renders. It refreshes the Supabase session cookie so it never expires
-  while the user is actively using the app. It also protects app routes from unauthenticated access.
+  Middleware runs on every request before page rendering.
+  It refreshes the Supabase session cookie so it stays valid
+  while the user interacts with the application.
+  It also guards private app routes from unauthenticated access.
 */
-export async function proxy(request: NextRequest) {
+export const middleware = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -30,8 +32,8 @@ export async function proxy(request: NextRequest) {
   );
 
   /*
-    Refresh session. Must be called before any redirect logic so the session cookie is always up to date.
-    we do not add any logic between createServerClient and getUser.
+    Refresh session. Must be called before any redirect logic
+    so the session cookie is always up to date.
   */
   const {
     data: { user },
@@ -48,7 +50,7 @@ export async function proxy(request: NextRequest) {
     pathname.startsWith("/verify");
 
   /*
-    Redirect unauthenticated users away from app routes.
+    Redirect unauthenticated visitors away from app routes.
   */
   if (isAppRoute && !user) {
     const redirectUrl = request.nextUrl.clone();
@@ -58,8 +60,7 @@ export async function proxy(request: NextRequest) {
   }
 
   /*
-    Redirect authenticated users away from auth routes.
-    They are already logged in.
+    Redirect authenticated visitors away from auth routes.
   */
   if (isAuthRoute && user) {
     const redirectUrl = request.nextUrl.clone();
@@ -68,7 +69,7 @@ export async function proxy(request: NextRequest) {
   }
 
   return supabaseResponse;
-}
+};
 
 export const config = {
   matcher: [
@@ -78,3 +79,4 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+
