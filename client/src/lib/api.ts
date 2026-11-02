@@ -3,6 +3,8 @@
   All requests to the backend go through these functions. we never call the backend directly from components.
 */
 
+import type { Document } from "@/types/document";
+
 const getBaseUrl = () =>
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -192,15 +194,15 @@ export const api = {
 
   documents: {
     list: (workspaceId: string) =>
-      request<{ documents: unknown[] }>(
+      request<{ documents: Document[] }>(
         `/api/workspaces/${workspaceId}/documents`
       ),
     get: (workspaceId: string, documentId: string) =>
-      request<{ document: unknown }>(
+      request<{ document: Document }>(
         `/api/workspaces/${workspaceId}/documents/${documentId}`
       ),
     upload: (workspaceId: string, formData: FormData) =>
-      upload<{ document: unknown }>(
+      upload<{ document: Document }>(
         `/api/workspaces/${workspaceId}/documents`,
         formData
       ),
